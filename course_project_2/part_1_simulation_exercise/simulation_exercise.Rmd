@@ -1,0 +1,58 @@
+---
+title: 'Statistical Inference Course Project, Part 1: Simulation Exercise'
+author: "Marcus Vinicius Monteiro de Souza"
+date: "June 17, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::read_chunk('reproducibility.R')
+knitr::read_chunk('simulations.R')
+knitr::read_chunk('sample_mean_versus_theoretical_mean.R')
+knitr::read_chunk('sample_variance_versus_theoretical_variance.R')
+knitr::read_chunk('distribution.R')
+```
+
+## Overview
+
+In this project we're going to investigate the [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) in R and compare it with the [Central Limit Theorem](https://en.wikipedia.org/wiki/Central_limit_theorem), by doing the following:
+
+1. Show a sample mean and compare it to the theoretical mean of the distribution.
+2. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+3. Show that the distribution is approximately normal.
+
+## Reproducibility
+
+Here we install and load the R packages we used, and specify the [seed](https://en.wikipedia.org/wiki/Random_seed) to initialize the pseudorandom number generator.
+
+```{r reproducibility}
+```
+
+## Simulations
+
+Here we use R's [rexp](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Exponential.html) function to generate 40 numbers from the exponential distribution, take their mean and store it in a [tibble](https://cran.r-project.org/web/packages/tibble/tibble.pdf). We use .2 as the rate parameter. We repeat the process 1000 times.
+
+```{r simulations}
+```
+
+## Sample Mean versus Theoretical Mean
+
+Here we plot the simulations means' distribution, and vertical lines showing the it's mean and the [theoretical mean](https://en.wikipedia.org/wiki/Exponential_distribution#Mean.2C_variance.2C_moments_and_median)(1 / rate). We can see that their values are very close to each other.
+
+```{r sample_mean_versus_theoretical_mean}
+```
+
+## Sample Variance versus Theoretical Variance
+
+The sample variance is also very close to the theoretical variance, as we can see in the table below.
+
+```{r sample_variance_versus_theoretical_variance}
+```
+
+## Distribution
+
+Here we show that the sample distribution is approximately normal by plotting a histogram of the density of sample's values and then overalying both the density line and a normal distribution built from the sample's mean and standard deviation.
+
+```{r distribution}
+```
