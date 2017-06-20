@@ -75,12 +75,39 @@ dose          | Dose in milligrams/day
 
 ## Is there a difference between ascorbic acid and orange juice supplements concerning tooth growth?
 
-```{r}
+If there was no difference between ascorbic acid and orange juice supplements concerning tooth growth, we would expect that the average tooth length would be the same, plus or minus chance variation. Let's have another look at the data: 
+
+```{r mean_tooth_len_by_dose_and_supp}
 ToothGrowth %>%
   group_by(supp, dose) %>%
-  summarise(mean.len = mean(len, na.rm = TRUE)) %>%
+  summarise(mean.len = mean(len)) %>%
   ggplot(aes(dose, mean.len)) +
+  geom_col(aes(fill = dose)) +
   facet_grid(. ~ supp) +
-  geom_point()
+  ggtitle('Mean Tooth Length by Dose and Supplement Type')
 ```
 
+It shows that the mean tooth length is higher for orange juice at doses 0.5 and 1, and equal at dose 2. But is that difference [significant](https://en.wikipedia.org/wiki/Statistical_significance)? Or it can be better explained by chance?
+
+### Hypothesis Test: Orange Juice Supplements Lead to More Tooth Growth Than Ascorbic Acid Ones
+
+To compare the two means statistically, we can perform a [t-test](http://www.investopedia.com/terms/t/t-test.asp), providing the following assumptions about data hold true:
+
+1. Normality.
+
+First, let's check if the sample can be considered as drawn from a normal distribution:
+
+```{r is_data_normal}
+qqnorm(ToothGrowth$len, main = 'Tooth Length Normal Q-Q Plot')
+qqline(ToothGrowth$len, col = 2)
+```
+
+The majority of the sample's observations fit the theoretical normal line.
+
+2. Independence
+
+The observations were drawn indep
+
+```{r t_test_len_supp}
+
+```
