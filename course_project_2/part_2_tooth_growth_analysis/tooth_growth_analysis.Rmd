@@ -1,0 +1,86 @@
+---
+title: "Tooth Growth Basic Inferential Analysis"
+author: "Marcus Vinicius Monteiro de Souza"
+date: "June 19, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+This work explores the ToothGrowth dataset from the Base R datasets package to find relationships, if there are any, between tooth growth and vitamin C consumption. Specifically, we'll try to answer the following questions:
+
+1. Is there a difference between ascorbic acid and orange juice supplements concerning tooth growth?
+2. Is tooth growth affected by vitamin C dosage?
+
+## A first look at the data
+
+The ToothGrowth dataset description reads:
+
+> The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
+Let's load the required packages:
+
+```{r load_required_packages}
+if (!require('pacman')) {
+  install.packages('pacman')
+}
+pacman::p_load(tidyverse)
+```
+
+and the data:
+
+```{r load_data}
+data('ToothGrowth')
+
+ToothGrowth <- as_tibble(ToothGrowth) %>%
+  mutate(dose = as.factor(dose))
+
+```
+
+Now, let's have a look at it's first observations:
+
+```{r head}
+head(ToothGrowth)
+```
+
+and it's last ones:
+
+```{r tail}
+tail(ToothGrowth)
+```
+
+See a compact display of it's contents:
+
+```{r str}
+str(ToothGrowth)
+```
+
+and a summary of some of it's statistics:
+
+```{r summary}
+summary(ToothGrowth)
+```
+
+To clarify the meaning of the variables:
+
+Variable Name | Description
+--------------|-------------
+len           | Tooth length
+supp          | Supplement type: VC (ascorbic acid) or OJ (orange juice)
+dose          | Dose in milligrams/day
+
+## Is there a difference between ascorbic acid and orange juice supplements concerning tooth growth?
+
+```{r}
+ToothGrowth %>%
+  group_by(supp, dose) %>%
+  summarise(mean.len = mean(len, na.rm = TRUE)) %>%
+  ggplot(aes(dose, mean.len)) +
+  facet_grid(. ~ supp) +
+  geom_point()
+```
+
