@@ -16,6 +16,7 @@ This work explores the ToothGrowth dataset from the Base R datasets package to f
 1. Is there a difference between ascorbic acid and orange juice supplements concerning tooth growth?
 2. Is tooth growth affected by vitamin C dosage?
 
+
 ## A first look at the data
 
 The ToothGrowth dataset description reads:
@@ -28,7 +29,7 @@ Let's load the required packages:
 if (!require('pacman')) {
   install.packages('pacman')
 }
-pacman::p_load(tidyverse)
+pacman::p_load(lsr, tidyverse)
 ```
 
 and the data:
@@ -41,25 +42,20 @@ ToothGrowth <- as_tibble(ToothGrowth) %>%
 
 ```
 
-Now, let's have a look at it's first observations:
+Now, let's have a look at the data:
 
-```{r head}
-head(ToothGrowth)
+```{r view_data}
+knitr::kable(ToothGrowth)
 ```
 
-and it's last ones:
 
-```{r tail}
-tail(ToothGrowth)
-```
-
-See a compact display of it's contents:
+See a compact display of what our R object looks like:
 
 ```{r str}
 str(ToothGrowth)
 ```
 
-and a summary of some of it's statistics:
+and a summary of some of the data's statistics:
 
 ```{r summary}
 summary(ToothGrowth)
@@ -67,11 +63,12 @@ summary(ToothGrowth)
 
 To clarify the meaning of the variables:
 
-Variable Name | Description
---------------|-------------
-len           | Tooth length
-supp          | Supplement type: VC (ascorbic acid) or OJ (orange juice)
-dose          | Dose in milligrams/day
+| Variable Name | Description                                              |
+| --------------|:---------------------------------------------------------|
+| len           | Tooth length                                             |
+| supp          | Supplement type: VC (ascorbic acid) or OJ (orange juice) |
+| dose          | Dose in milligrams/day                                   |
+
 
 ## Is there a difference between ascorbic acid and orange juice supplements concerning tooth growth?
 
@@ -89,9 +86,10 @@ ToothGrowth %>%
 
 It shows that the mean tooth length is higher for orange juice at doses 0.5 and 1, and equal at dose 2. But is that difference [significant](https://en.wikipedia.org/wiki/Statistical_significance)? Or it can be better explained by chance?
 
-### Hypothesis Test: Orange Juice Supplements Lead to More Tooth Growth Than Ascorbic Acid Ones
 
-To compare the two means statistically, we can perform a [t-test](http://www.investopedia.com/terms/t/t-test.asp), providing the following assumptions about data hold true:
+### Alternative Hypothesis Test: Orange Juice Supplements Lead to More Tooth Growth Than Ascorbic Acid Ones
+
+To compare the two means statistically, we can perform a [t-test](http://www.investopedia.com/terms/t/t-test.asp), providing the following assumptions about data hold true [see](https://health.adelaide.edu.au/psychology/ccs/docs/lsr/lsr-0.5.pdf):
 
 1. Normality.
 
@@ -106,8 +104,48 @@ The majority of the sample's observations fit the theoretical normal line.
 
 2. Independence
 
-The observations were drawn indep
+The observations were drawn independently from 60 guinea pigs.
+
+Also very importantly, we'll do an [unpaired, or independent samples test](https://en.wikipedia.org/wiki/Student%27s_t-test#Unpaired_and_paired_two-sample_t-tests), because there is no good reason to assume that the guinea pigs were somehow paired, much less that the same pigs were tested with both supplements.
+
+So, finally, let's do the test:
 
 ```{r t_test_len_supp}
-
+independentSamplesTTest(len ~ supp, as.data.frame(ToothGrowth))
 ```
+
+The conclusion is: the mean tooth length of the pigs given orange juice supplements was *20.66 (std dev = 6.60)* whereas the mean tooth length of the pigs given ascorbic acid supplements was *16.96 (std dev = 8.26)*. A Welch's independent samples t-test showed that this 3.7 unit lengths of difference was **not significant** *(t(55.30) = 1.915, p > .05, CI95 = [-0.171, 7.571], d = 0.495)*, suggesting that **there is not a difference between taking orange juice and ascorbic acid supplements concercing tooth growth**.
+
+
+## Is there a difference between the supplements' dosage concerning tooth growth?
+
+If there was no difference between the supplements dosage concerning tooth growth, we would expect that the average tooth length at every dosage level would be the same, plus or minus chance variation. Let's have a look at the data:
+
+```{r tooth_len_by_dose}
+ToothGrowth %>%
+  group_by(dose) %>%
+  summarise(mean.len = mean(len)) %>%
+  ggplot(aes(dose, mean.len)) +
+  geom_col(aes(fill = dose)) +
+  ggtitle('Tooth Length by Dose')
+```
+
+Apparently, the higher the supplement dose, the longer the tooth, but we need to check if this difference is significant:
+
+```{r t_test_len_dose}
+dose.0.5.and.1 <- ToothGrowth %>% filter(dose %in% c(.5, 1))
+dose.0.5.and.2 <- ToothGrowth %>% filter(dose %in% c(.5, 2))
+dose.1.and.2 <- ToothGrowth %>% filter(dose %in% c(1, 2))
+
+independentSamplesTTest(len ~ dose, as.data.frame(dose.0.5.and.1))
+independentSamplesTTest(len ~ dose, as.data.frame(dose.0.5.and.2))
+independentSamplesTTest(len ~ dose, as.data.frame(dose.1.and.2))
+```
+
+The conclusion is: the mean tooth length of the pigs given a dosage of 0.5mm/day of vitaming C supplements was *10.60 (std dev = 4.41)*, mean tooth length of the pigs given a dosage of 1mm/day was *19.735 (std dev = 4.41)*, and mean tooth length of the pigs given a dosage of 2mm/day was *26.100 (std dev = 3.77)*. A series of Welch's independent samples t-tests showed that the difference of unit lengths between each level was **highly significant**:
+
+1. *(t(37.98) = -6.477, p < .001, CI95 = [-11.984, -6.276], d = 2.048)*
+2. *(t(36.88) = -11.799, p < .001, CI95 = [-18.156, -12.834], d = 3.731)*
+3. *(t(37.10) = -4.9, p < .001, CI95 = [-8.996, -3.734], d = 1.55)*
+
+suggesting that **there is a difference between each dosage level concerning tooth growth**.
